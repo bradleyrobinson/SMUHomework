@@ -12,7 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 #### Question 1
 ##### A.
 ```{r}
-install.packages("fivethirtyeight")
+# Uncomment this if running the package for the first time.
+# install.packages("fivethirtyeight")
 library(fivethirtyeight)
 library(tidyverse)
 ```
@@ -24,7 +25,7 @@ datasets$Item[18]
 df <- college_recent_grads
 ```
 ##### C.
-Using the vignette function, we can discover the corresponding e-mail to the dataset:
+Using the vignette function, we can discover the corresponding article to the dataset:
 ```{r}
 vignette("fivethirtyeight", package = "fivethirtyeight")
 ```
@@ -43,11 +44,11 @@ columnNames <- function(df) {
   names(df)
 }
 columnNames(df)
-rowNumber <- function(df) {
+columnNumbers <- function(df) {
   shape <- dim(df)
-  shape[1]
+  shape[2]
 }
-rowNumber(df)
+columnNumbers(df)
 ```
 ##### B.
 ```{r}
@@ -70,3 +71,5 @@ ggplot(major_count) +
 write.csv(df, "majors.csv", row.names = FALSE)
 ```
 
+To see this notebook along with its corresponding data on Github, visit: 
+https://github.com/bradleyrobinson/SMUHomework/tree/master/learning_data_science/assignment_4
