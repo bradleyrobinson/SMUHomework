@@ -1,0 +1,72 @@
+---
+title: "Assignment 4"
+author: "Bradley Robinson"
+date: "October 1, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Question 1
+##### A.
+```{r}
+install.packages("fivethirtyeight")
+library(fivethirtyeight)
+library(tidyverse)
+```
+##### B.
+```{r}
+datasetInfo <- data(package = "fivethirtyeight")
+datasets <- as.data.frame(datasetInfo$results)
+datasets$Item[18]
+df <- college_recent_grads
+```
+##### C.
+Using the vignette function, we can discover the corresponding e-mail to the dataset:
+```{r}
+vignette("fivethirtyeight", package = "fivethirtyeight")
+```
+Which is: http://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/
+
+##### D.
+Dimensions and names:
+```{r}
+dim(df)
+names(df)
+```
+#### Question 2.
+##### A.
+```{r}
+columnNames <- function(df) {
+  names(df)
+}
+columnNames(df)
+rowNumber <- function(df) {
+  shape <- dim(df)
+  shape[1]
+}
+rowNumber(df)
+```
+##### B.
+```{r}
+major_category_grouping <- df %>%
+  group_by(major_category)
+major_count <- summarise(major_category_grouping, count = n_distinct(major))
+major_count
+```
+
+```{r}
+ggplot(major_count) +
+  geom_col(mapping = aes(x = major_category, y = count), fill = "darkblue", color="black") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(title = "Unique majors in each major category",
+       x = "Major category", y = "Count") + 
+  coord_flip(ylim = c(1, max(major_count$count)))
+```
+
+```{r}
+write.csv(df, "majors.csv", row.names = FALSE)
+```
+
