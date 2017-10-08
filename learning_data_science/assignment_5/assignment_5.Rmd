@@ -74,4 +74,6 @@ top_10_girls
 ```{r}
 write.csv(top_10_girls, "top_10_girls.csv", row.names = F)
 ```
+All the code here can be found at:
+https://github.com/bradleyrobinson/SMUHomework/tree/master/learning_data_science/assignment_5
 
