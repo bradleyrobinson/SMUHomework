@@ -1,0 +1,77 @@
+---
+title: "Assignment 5"
+output: html_notebook
+---
+
+#### Question 1.
+##### A.
+```{r}
+df <- read.csv("yob2016.txt", sep = ";", header = F)
+names(df) <- c("name", "gender", "freq")
+```
+##### B.
+```{r}
+head(df)
+summary(df)
+dim(df)
+```
+
+##### C.
+```{r}
+incorrect_name <- as.vector(df$name[grepl("y{3}" ,df$name)])[1]
+incorrect_name
+```
+```{r}
+y2016 <- df[!grepl("y{3}" ,df$name),]
+head(y2016)
+summary(y2016)
+dim(y2016)
+```
+#### Question 2.
+##### A.
+```{r}
+y2015 <- read.csv("yob2015.txt", header = F)
+names(y2015) <- c("name", "gender", "freq")
+```
+##### B.
+```{r}
+tail(y2015, n = 10)
+```
+All of the names are male, start with the letter Z, and have the same frequency (5). They seem like very original names, which makes me wonder why there are more than one of these names.
+```{r}
+final <- merge(y2016, y2015, by = c("name", "gender"), all = TRUE)
+dim(final)
+head(final, n = 10)
+names(final) <- c("name", "gender", "freq_2016", "freq_2015")
+final <- final[!(is.na(final$freq_2016) | is.na(final$freq_2015)),]
+dim(final)
+head(final, n = 10)
+```
+
+#### Question 3.
+##### A.
+```{r}
+final$Total <- final$freq_2016 + final$freq_2015
+head(final)
+sum(final$Total)
+```
+The total number of babies given popular names is 7,239,231.
+##### B.
+```{r}
+sorted <- final[order(-final$Total),]
+```
+A list of the most popular names:
+```{r}
+head(sorted, n = 10)
+```
+##### C.
+```{r}
+just_girls <- sorted[sorted$gender == 'F', ]
+top_10_girls <- head(just_girls, n = 10)
+top_10_girls
+```
+##### D.
+```{r}
+write.csv(top_10_girls, "top_10_girls.csv", row.names = F)
+```
+
