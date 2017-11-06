@@ -1,0 +1,88 @@
+---
+title: "Assignment 10"
+output:
+  html_document: default
+  html_notebook: default
+---
+## Hospital analysis
+
+##### Question 1
+
+##### A.
+```{r}
+library(tidyverse)
+load("data/data.rda")
+head(mh2015_puf)
+```
+##### B.
+```{r}
+levels(mh2015_puf$LST)
+```
+
+
+##### C.
+###### Filtering the data
+```{r}
+vamc <- levels(mh2015_puf$FACILITYTYPE)[6]
+vmac_only <- mh2015_puf[mh2015_puf$FACILITYTYPE == vamc,]
+excluded <- c("AS", "GU", "HI", "PR", "VI")
+mainland_vmac <- vmac_only[!(trimws(as.character(vmac_only$LST)) %in% excluded),]
+mainland_vmac$LST <- droplevels(mainland_vmac$LST)
+head(mainland_vmac)
+```
+###### Creating counts
+```{r}
+state_counts <- as.data.frame(table(mainland_vmac$LST))
+names(state_counts) <- c("LST", "Freq")
+state_counts
+```
+
+##### D.
+```{r, fig.width=10, fig.height=13}
+ggplot(data = state_counts) +
+  geom_col(mapping = (aes(x = reorder(LST, Freq), y = Freq, fill = LST))) + 
+  coord_flip() +
+  labs(title = "Veteran Administration Medical Centers (VMAC) per State") +
+  ylab("VAMCs") + 
+  xlab("State") +
+  theme(legend.position = "none")
+  
+```
+
+#### Question 2
+##### A.
+```{r}
+state_size <- read.csv("data/statesize.csv")
+head(state_size)
+mainland_size <- merge(state_counts, state_size, by.x = "LST", by.y = "Abbrev")
+```
+
+```{r}
+paste(state_counts$LST, state_size$Abbrev)
+```
+
+##### B.
+```{r}
+state_counts$LST <- trimws(as.character(state_counts$LST))
+mainland_size <- merge(state_counts, state_size, by.x = "LST", by.y = "Abbrev")
+head(mainland_size)
+```
+
+##### C.
+```{r}
+mainland_size$HospitalPS <- mainland_size$Freq/(mainland_size$SqMiles/1000)
+mainland_size <- mainland_size[!mainland_size$LST == "HI",]
+mainland_size
+```
+##### D.
+```{r, fig.width=10, fig.height=13}
+ggplot(data = mainland_size) +
+  geom_col(mapping = aes(x = reorder(LST, HospitalPS), y = HospitalPS, fill = Region)) + 
+  labs(title = "Hospital Rates by State") +
+  xlab("State") +
+  ylab("Hospital per 1000 Square Miles") +
+  coord_flip()
+
+```
+##### E.
+It appears that there are a few patterns. The states with the highest frequency are all in the Northeast, with Rhode Island and New Jersey far outstripping the rest of the states. It appears that the west, on the other hand, has no state that has a high rate of VAMC hospitals and has some of the states with the lowest rates. The South and the Midwest seems to be a mixed bag, a few states are at the top and some that are near the bottom. Given these results, I would suggest focusing hospital construction in the western United States. The problem with the low rates of VAMC in the west is serious, and is compounded by the fact that western states are large, and so travelling to another state (a realistic option in many Northeastern states) is rarely an option for patients. Given that North Dakota appears to have none at all, it also would be imperative to ensure that VAMC hospitals are available there. 
