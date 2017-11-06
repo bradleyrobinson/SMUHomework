@@ -1,0 +1,109 @@
+---
+title: "Assignment 9"
+output: html_notebook
+---
+
+### Question 1
+##### A.
+```{r}
+library(rvest)
+library(stringr)
+library(ggplot2)
+html_doc <- read_html("http://www.imdb.com/title/tt1201607/fullcredits?ref_=tt_ql_1")
+```
+##### B.
+
+```{r}
+people_props <- html_doc %>%
+  html_nodes(".itemprop")
+people_names <- people_props %>% html_nodes(".itemprop") %>% html_text()
+character_names <- html_doc %>%
+  html_nodes(".character") %>%
+  html_text(trim=T)
+head(people_names, n = 11)
+head(character_names, n = 11)
+tail(character_names)
+```
+```{r}
+people_names <- people_names[0:length(character_names)]
+hp_cast <- data.frame(people_names, character_names, stringsAsFactors = F)
+head(hp_cast)
+```
+### C.
+
+```{r}
+hp_cast$character_names <- str_replace_all(hp_cast$character_names, "\n", "")
+names(hp_cast) <- c("Actor", "Character")
+```
+### D.
+
+```{r}
+library(purrr)
+actors <- hp_cast$Actor
+actors_split <- str_split(actors, " ")
+extract_names <- function(x) {
+  values <- length(x)
+  first <- paste(x[1:values-1], collapse = " ")
+  last <- x[values]
+  c(first, last)
+}
+names <- setNames(do.call(rbind.data.frame, lapply(actors_split, extract_names)), c("FirstName", "Surname"))
+```
+```{r}
+hp_cast_clean <- names
+hp_cast_clean$Characters <- hp_cast$Character
+head(hp_cast_clean, n = 10)
+```
+### Question 2.
+##### A.
+```{r}
+sports_html <- read_html("http://www.espn.com/nba/team/stats/_/name/sa/san-antonio-spurs")
+```
+##### B.
+```{r}
+sports_data_all <- sports_html %>%
+  html_nodes("table")
+filtered_all <- xml_contents(sports_data_all)
+filtered_throwing <- filtered_all[18:length(filtered_all)]
+column_names <- filtered_throwing[2] %>%
+  html_nodes("td") %>%
+  html_text
+```
+```{r}
+records <- vector("list", length = length(filtered_throwing) - 2)
+
+my_func <- function(x) {
+  data <- x %>%
+    html_nodes("td") %>%
+    html_text()
+  data
+}
+sports_df <- t(data.frame(sapply(filtered_throwing[3:length(filtered_throwing)], my_func), stringsAsFactors = F))
+```
+##### C.
+```{r}
+colnames(sports_df) <- column_names
+write.csv(sports_df, "sports.csv")
+df <- read.csv("sports.csv")
+df_clean <- df[1:(length(df) - 2), !names(df) == "X"]
+df_clean
+```
+```{r}
+extract_name_position <- function(x) {
+  split_up <- str_split(x, ", ")
+}
+name_position <- setNames(do.call(rbind.data.frame, lapply(str_split(df_clean$PLAYER, ", "), extract_name_position)), c("Name", "Position"))
+row.names(name_position) <- 1:length(name_position$Name)
+sports_df3 <- data.frame(name_position, df_clean)
+sports_df3$PLAYER <- NULL
+sports_df3
+```
+##### D.
+```{r}
+ggplot(sports_df3) +
+  geom_col(mapping = aes(x = Name, y = sports_df3$FG., fill = Position)) +
+  labs(title = "Field Goal Percentage for San Antonio Spurs Players") +
+  ylab("Field Goal Percentage") +
+  theme(axis.text.x = element_text(angle=90, vjust=.1))
+```
+
