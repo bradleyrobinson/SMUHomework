@@ -86,3 +86,6 @@ ggplot(data = mainland_size) +
 ```
 ##### E.
 It appears that there are a few patterns. The states with the highest frequency are all in the Northeast, with Rhode Island and New Jersey far outstripping the rest of the states. It appears that the west, on the other hand, has no state that has a high rate of VAMC hospitals and has some of the states with the lowest rates. The South and the Midwest seems to be a mixed bag, a few states are at the top and some that are near the bottom. Given these results, I would suggest focusing hospital construction in the western United States. The problem with the low rates of VAMC in the west is serious, and is compounded by the fact that western states are large, and so travelling to another state (a realistic option in many Northeastern states) is rarely an option for patients. Given that North Dakota appears to have none at all, it also would be imperative to ensure that VAMC hospitals are available there. 
+
+
+This code can be found at https://github.com/bradleyrobinson/SMUHomework/tree/master/learning_data_science/unit_10
