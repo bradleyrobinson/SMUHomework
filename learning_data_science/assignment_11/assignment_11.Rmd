@@ -1,0 +1,108 @@
+---
+title: "Assignment 11"
+output: html_notebook
+---
+
+#### Question 1
+
+##### A.
+```{r}
+help("EuStockMarkets")
+head(EuStockMarkets)
+head(EuStockMarkets[,1])
+```
+##### B.
+```{r}
+plot.ts(EuStockMarkets[,1], col = "blue", ylab="DAX", main = "DAX Stock, 1991-1998")
+abline(v=c(1997), col= "red")
+```
+```{r}
+euDecomposed <- decompose(EuStockMarkets[,1], type = "multiplicative")
+plot.ts(euDecomposed$seasonal, col = "blue", ylab="DAX", main = "Seasonal Decomposition of DAX Stock, 1991-1998")
+abline(v=c(1997), col= "red")
+
+plot.ts(euDecomposed$trend, col = "blue", ylab="DAX", main = "Trend of DAX Stock, 1991-1998")
+abline(v=c(1997), col= "red")
+
+plot.ts(euDecomposed$random, col = "blue", ylab="DAX", main = "Random Variation of DAX Stock, 1991-1998")
+abline(v=c(1997), col= "red")
+```
+
+#### Question 2
+##### A.
+```{r}
+#install.packages("fpp2")
+library(fpp2)
+help("maxtemp")
+autoplot(maxtemp)
+```
+##### B.
+```{r}
+maxtemp1990 <- ts(maxtemp[20:length(maxtemp)], start = 1990)
+autoplot(maxtemp1990)
+```
+##### C.
+```{r}
+maxtemps_ses <- ses(maxtemp1990, h = 5)
+pred_temps <- forecast(maxtemps_ses)
+plot.ts(maxtemp1990, xlim = c(1990, 2021), col = "blue", ylab = "Temperature in Celcius", main = "Maximum Temperature Projections for Australia Using SES")
+lines(maxtemps_ses$fitted)
+lines(pred_temps$mean, col = "red")
+aic_maxtemps_ses <- AIC(maxtemps_ses$model)
+```
+##### D.
+```{r}
+maxtemps_holt <- holt(maxtemp1990, damped = TRUE, initial = "optimal")
+plot.ts(maxtemp1990, xlim = c(1990, 2021), col = "blue", ylab = "Temperature in Celcius", main = "Maximum Temperature Projections for Australia Using Holt")
+lines(maxtemps_holt$fitted)
+lines(maxtemps_holt$mean, col = "red")
+aic_maxtemps_holt <- AIC(maxtemps_holt$model)
+```
+##### E.
+```{r}
+print.default(aic_maxtemps_ses)
+print.default(aic_maxtemps_holt)
+```
+
+Both AIC values are so close that it is difficult to distinguish the models. However, the Holt model value is slightly lower, so it may be a better model. Looking at the graph confirms that suspicion, that the predictions seem to follow the pattern a little better.
+
+#### Question 3
+##### A.
+```{r}
+#install.packages("dygraphs")
+library(dygraphs)
+ollivander <- read.csv("Unit11TimeSeries_Ollivander.csv", header=F)
+gregorovitch <- read.csv("Unit11TimeSeries_Gregorovitch.csv", header=F)
+```
+##### B.
+```{r}
+ollivander$V1 <- as.Date(ollivander$V1, format="%m/%d/%Y")
+gregorovitch$V1 <- as.Date(gregorovitch$V1, format="%m/%d/%Y")
+head(ollivander$V1)
+head(gregorovitch$V1)
+names(ollivander) <- c("date", "sold")
+names(gregorovitch) <- c("date", "sold")
+```
+##### C.
+```{r}
+library(xts)
+oll_ts <- xts(ollivander$sold, order.by = ollivander$date)
+greg_ts <- xts(gregorovitch$sold, order.by = gregorovitch$date)
+autoplot(oll_ts)
+autoplot(greg_ts)
+```
+
+```{r}
+wands <- merge(greg_ts, oll_ts)
+head(wands)
+dygraph(wands, main = "Wand Sales for Gregorovitch and Ollivander, 1970-2016", ylab = "Wands Sold", xlab = "Year") %>%
+  dySeries("greg_ts", label = "Gregorovitch", color = "red") %>%
+  dySeries("oll_ts", label = "Ollivander", color = "purple") %>%
+  dyOptions(stackedGraph = T) %>%
+  dyShading(from = "1995-1-1", to = "1999-1-1") %>%
+  dyRangeSelector() %>%
+  dyHighlight()
+```
+
+### More Info
+This notebook can be found at https://github.com/bradleyrobinson/SMUHomework/tree/master/learning_data_science/assignment_11
